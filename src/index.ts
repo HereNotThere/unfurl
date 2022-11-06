@@ -1,4 +1,3 @@
-import { URL } from "url";
 import { Parser } from "htmlparser2";
 import fetch from "node-fetch";
 import UnexpectedError from "./unexpectedError";
@@ -467,4 +466,4 @@ function parse(url: string) {
   };
 }
 
-export { unfurl };
+export { unfurl, Metadata };

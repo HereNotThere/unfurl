@@ -23,6 +23,7 @@ export type Metadata = {
   favicon?: string;
   author?: string;
   oEmbed?: {
+    url: string;
     type: "photo" | "video" | "link" | "rich";
     width?: number;
     height?: number;
