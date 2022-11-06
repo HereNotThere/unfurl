@@ -1,4 +1,5 @@
-dist
+# including dist instead of npm publishing
+# dist 
 
 # Logs
 logs

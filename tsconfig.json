@@ -4,9 +4,9 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "sourceMap": true,
-    "lib": ["es2017"],
-    "module": "commonjs",
-    "target": "es2017",
+    "lib": ["es2021", "DOM"],
+    "module": "CommonJS",
+    "target": "es2021",
     "declaration": true,
     "typeRoots": ["node_modules/@types", "src/typings"]
   },

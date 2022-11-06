@@ -1,7 +1,7 @@
 {
   "name": "unfurl.js",
   "engines": {
-    "node": ">=6.0.0"
+    "node": ">=18.0.0"
   },
   "version": "5.1.0",
   "description": "Scraper for oEmbed, Twitter Cards and Open Graph metadata - fast and Promise-based",
@@ -30,7 +30,8 @@
     "nock": "^13.1.3",
     "prettier": "^2.7.1",
     "ts-jest": "^23.1.4",
-    "typescript": "^4.8.4"
+    "typescript": "^4.8.4",
+    "husky": "^8.0.0"
   },
   "scripts": {
     "lint": "eslint . --ext .ts",
@@ -39,7 +40,7 @@
     "start": "node dist/index.js",
     "watch": "tsc -w --outDir dist",
     "build": "tsc --outDir dist",
-    "prepare": "npm run build"
+    "prepare": "npm run build && husky install"
   },
   "keywords": [
     "oembed",
