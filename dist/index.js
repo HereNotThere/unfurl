@@ -29,7 +29,7 @@ function unfurl(url, opts) {
     Number.isInteger(opts.size) || (opts.size = 0);
     return getPage(url, opts)
         .then(getMetadata(url, opts))
-        .then(getRemoteMetadata(url))
+        .then(getRemoteMetadata(url, opts))
         .then(parse(url));
 }
 exports.unfurl = unfurl;
@@ -99,19 +99,19 @@ async function getPage(url, opts) {
     }
     return buf.toString();
 }
-function getRemoteMetadata(url) {
+function getRemoteMetadata(url, { fetch = node_fetch_1.default }) {
     return async function ({ oembed, metadata }) {
         if (!oembed) {
             return metadata;
         }
         const target = new URL((0, he_1.decode)(oembed.href), url);
-        let res = await (0, node_fetch_1.default)(target.href);
+        let res = await fetch(target.href);
         let contentType = res.headers.get("Content-Type");
         const status = res.status;
         if (status === 403 && target.protocol === "http:") {
             // try again using HTTPS
             target.protocol = "https:";
-            res = await (0, node_fetch_1.default)(target.href);
+            res = await fetch(target.href);
             contentType = res.headers.get("Content-Type");
         }
         let ret;
@@ -211,6 +211,12 @@ function getMetadata(url, opts) {
                             new URL(parserContext.favicon, url).href,
                         ]);
                     }
+                    if (parserContext.canonical_url) {
+                        metadata.push([
+                            "canonical_url",
+                            new URL(parserContext.canonical_url, url).href,
+                        ]);
+                    }
                     resolve({ oembed, metadata });
                 },
                 onopentagname: function (tag) {
@@ -245,6 +251,11 @@ function getMetadata(url, opts) {
                         (attribs.rel === "icon" || attribs.rel === "shortcut icon")) {
                         parserContext.favicon = attribs.href;
                     }
+                    if (tagname === "link" &&
+                        attribs.href &&
+                        attribs.rel === "canonical") {
+                        parserContext.canonical_url = attribs.href;
+                    }
                     let pair;
                     if (tagname === "meta") {
                         if (attribs.name === "description" && attribs.content) {
@@ -252,6 +263,9 @@ function getMetadata(url, opts) {
                         }
                         else if (attribs.name === "author" && attribs.content) {
                             pair = ["author", attribs.content];
+                        }
+                        else if (attribs.name === "theme-color" && attribs.content) {
+                            pair = ["theme_color", attribs.content];
                         }
                         else if (attribs.name === "keywords" && attribs.content) {
                             const keywords = attribs.content
@@ -359,7 +373,7 @@ function parse(url) {
                     target = target[item.parent][target[item.parent].length - 1];
                 }
             }
-            // some fields map to the same name so once nicwe have one stick with it
+            // some fields map to the same name so once we have one stick with it
             target[item.name] || (target[item.name] = metaValue);
         }
         if (ogVideoTags.length && parsed.open_graph.videos) {
