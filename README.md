@@ -18,7 +18,9 @@ yarn add unfurl.js@<git-remote-url>
 
 # Unfurl
 
-A metadata scraper with support for oEmbed, Twitter Cards and Open Graph Protocol for Node.js (>=v8.0.0)
+A metadata scraper with support for oEmbed, Twitter Cards and Open Graph Protocol for Node.js (>=v8.0.0). 
+
+Note: Will not work in the Browser
 
 [![Travis CI](https://img.shields.io/travis/jacktuck/unfurl?style=flat-square)](https://travis-ci.org/jacktuck/unfurl)
 [![Coverage Status](https://img.shields.io/coveralls/jacktuck/unfurl?style=flat-square)](https://coveralls.io/github/jacktuck/unfurl?branch=master)
@@ -29,7 +31,7 @@ A metadata scraper with support for oEmbed, Twitter Cards and Open Graph Protoco
 
 ## The what
 
-Unfurl _(spread out from a furled state)_ will take a `url` and some `options`, fetch the `url`, extract the metadata we care about and format the result in a saine way. It supports all major metadata providers and expanding it to work for any others should be trivial.
+Unfurl _(spread out from a furled state)_ will take a `url` and some `options`, fetch the `url`, extract the metadata we care about and format the result in a sane way. It supports all major metadata providers and expanding it to work for any others should be trivial.
 
 ## The why
 
@@ -48,13 +50,12 @@ npm install unfurl.js
 ---
 
 #### opts - `object` of:
-
-- `oembed?: boolean` - support retrieving oembed metadata
-- `timeout? number` - req/res timeout in ms, it resets on redirect. 0 to disable (OS limit applies)
-- `follow?: number` - maximum redirect count. 0 to not follow redirect
-- `compress?: boolean` - support gzip/deflate content encoding
-- `size?: number` - maximum response body size in bytes. 0 to disable
-- `headers?: Headers | Record<string, string> | Iterable<readonly [string, string]> | Iterable<Iterable<string>>` - map of request headers, overrides the defaults
+-  `oembed?: boolean` - support retrieving oembed metadata
+-  `timeout?  number` - req/res timeout in ms, it resets on redirect. 0 to disable (OS limit applies)
+-  `follow?: number` - maximum redirect count. 0 to not follow redirect
+-  `compress?: boolean` - support gzip/deflate content encoding
+-  `size?: number` - maximum response body size in bytes. 0 to disable
+-  `headers?: Headers | Record<string, string> | Iterable<readonly [string, string]> | Iterable<Iterable<string>>` - map of request headers, overrides the defaults
 
 Default headers:
 
@@ -80,28 +81,14 @@ const result = unfurl("https://github.com/trending");
 
 ```typescript
 type Metadata = {
-  title?: string;
-  description?: string;
-  keywords?: string[];
-  favicon?: string;
-  author?: string;
-  oEmbed?: {
-    type: "photo" | "video" | "link" | "rich";
-    version?: string;
-    title?: string;
-    author_name?: string;
-    author_url?: string;
-    provider_name?: string;
-    provider_url?: string;
-    cache_age?: number;
-    thumbnails?: [
-      {
-        url?: string;
-        width?: number;
-        height?: number;
-      }
-    ];
-  };
+  title?: string
+  description?: string
+  keywords?: string[]
+  favicon?: string
+  author?: string
+  theme_color?: string
+  canonical_url?: string
+  oEmbed?: OEmbedPhoto | OEmbedVideo | OEmbedLink | OEmbedRich
   twitter_card: {
     card: string;
     site?: string;
@@ -141,13 +128,14 @@ type Metadata = {
     title: string;
     type: string;
     images?: {
-      url: string;
-      secure_url?: string;
-      type: string;
-      width: number;
-      height: number;
-    }[];
-    url?: string;
+      url: string
+      secure_url?: string
+      type: string
+      width: number
+      height: number
+      alt?: string
+    }[]
+    url?: string
     audio?: {
       url: string;
       secure_url?: string;
@@ -166,15 +154,58 @@ type Metadata = {
       tags?: string[];
     }[];
     article: {
-      published_time?: string;
-      modified_time?: string;
-      expiration_time?: string;
-      author?: string;
-      section?: string;
-      tags?: string[];
-    };
-  };
-};
+      published_time?: string
+      modified_time?: string
+      expiration_time?: string
+      author?: string
+      section?: string
+      tags?: string[]
+    }
+  }
+}
+
+type OEmbedBase = {
+  type: "photo" | "video" | "link" | "rich"
+  version: string
+  title?: string
+  author_name?: string
+  author_url?: string
+  provider_name?: string
+  provider_url?: string
+  cache_age?: number
+  thumbnails?: [
+    {
+      url?: string
+      width?: number
+      height?: number
+    }
+  ]
+}
+
+type OEmbedPhoto = OEmbedBase & {
+  type: "photo"
+  url: string
+  width: number
+  height: number
+}
+
+type OEmbedVideo = OEmbedBase & {
+  type: "video"
+  html: string
+  width: number
+  height: number
+}
+
+type OEmbedLink = OEmbedBase & {
+  type: "link"
+}
+
+type OEmbedRich = OEmbedBase & {
+  type: "rich"
+  html: string
+  width: number
+  height: number
+}
 ```
 
 ## The who 💖

@@ -1,5 +1,5 @@
 import { Parser } from "htmlparser2";
-import fetch from "node-fetch";
+import nodeFetch from "node-fetch";
 import UnexpectedError from "./unexpectedError";
 import { schema, keys } from "./schema";
 import { Metadata, Opts } from "./types";
@@ -13,6 +13,7 @@ type ParserContext = {
   text: string;
   title?: string;
   tagName?: string;
+  canonical_url?: string;
 };
 
 const defaultHeaders = {
@@ -39,14 +40,14 @@ function unfurl(url: string, opts?: Opts): Promise<Metadata> {
 
   return getPage(url, opts)
     .then(getMetadata(url, opts))
-    .then(getRemoteMetadata(url))
+    .then(getRemoteMetadata(url, opts))
     .then(parse(url));
 }
 
 async function getPage(url: string, opts: Opts) {
   const res = await (opts.fetch
     ? opts.fetch(url)
-    : fetch(new URL(url), {
+    : nodeFetch(new URL(url), {
         headers: opts.headers,
         size: opts.size,
         follow: opts.follow,
@@ -120,7 +121,7 @@ async function getPage(url: string, opts: Opts) {
   return buf.toString();
 }
 
-function getRemoteMetadata(url: string) {
+function getRemoteMetadata(url: string, { fetch = nodeFetch }: Opts) {
   return async function ({ oembed, metadata }) {
     if (!oembed) {
       return metadata;
@@ -267,6 +268,13 @@ function getMetadata(url: string, opts: Opts) {
             ]);
           }
 
+          if (parserContext.canonical_url) {
+            metadata.push([
+              "canonical_url",
+              new URL(parserContext.canonical_url, url).href,
+            ]);
+          }
+
           resolve({ oembed, metadata });
         },
 
@@ -314,6 +322,14 @@ function getMetadata(url: string, opts: Opts) {
             parserContext.favicon = attribs.href;
           }
 
+          if (
+            tagname === "link" &&
+            attribs.href &&
+            attribs.rel === "canonical"
+          ) {
+            parserContext.canonical_url = attribs.href;
+          }
+
           let pair: [string, string | string[]];
 
           if (tagname === "meta") {
@@ -321,6 +337,8 @@ function getMetadata(url: string, opts: Opts) {
               pair = ["description", attribs.content];
             } else if (attribs.name === "author" && attribs.content) {
               pair = ["author", attribs.content];
+            } else if (attribs.name === "theme-color" && attribs.content) {
+              pair = ["theme_color", attribs.content];
             } else if (attribs.name === "keywords" && attribs.content) {
               const keywords = attribs.content
                 .replace(/^[,\s]{1,}|[,\s]{1,}$/g, "") // gets rid of trailing space or sommas
@@ -445,7 +463,7 @@ function parse(url: string) {
         }
       }
 
-      // some fields map to the same name so once nicwe have one stick with it
+      // some fields map to the same name so once we have one stick with it
       target[item.name] || (target[item.name] = metaValue);
     }
 

@@ -21,26 +21,9 @@ export declare type Metadata = {
     keywords?: string[];
     favicon?: string;
     author?: string;
-    oEmbed?: {
-        url: string;
-        type: "photo" | "video" | "link" | "rich";
-        width?: number;
-        height?: number;
-        version?: string;
-        title?: string;
-        author_name?: string;
-        author_url?: string;
-        provider_name?: string;
-        provider_url?: string;
-        cache_age?: number;
-        thumbnails?: [
-            {
-                url?: string;
-                width?: number;
-                height?: number;
-            }
-        ];
-    };
+    theme_color?: string;
+    canonical_url?: string;
+    oEmbed?: OEmbedPhoto | OEmbedVideo | OEmbedLink | OEmbedRich;
     twitter_card: {
         card: string;
         site?: string;
@@ -85,6 +68,7 @@ export declare type Metadata = {
             type: string;
             width: number;
             height: number;
+            alt?: string;
         }[];
         url?: string;
         audio?: {
@@ -114,3 +98,42 @@ export declare type Metadata = {
         };
     };
 };
+declare type OEmbedBase = {
+    type: "photo" | "video" | "link" | "rich";
+    version: string;
+    title?: string;
+    author_name?: string;
+    author_url?: string;
+    provider_name?: string;
+    provider_url?: string;
+    cache_age?: number;
+    thumbnails?: [
+        {
+            url?: string;
+            width?: number;
+            height?: number;
+        }
+    ];
+};
+declare type OEmbedPhoto = OEmbedBase & {
+    type: "photo";
+    url: string;
+    width: number;
+    height: number;
+};
+declare type OEmbedVideo = OEmbedBase & {
+    type: "video";
+    html: string;
+    width: number;
+    height: number;
+};
+declare type OEmbedLink = OEmbedBase & {
+    type: "link";
+};
+declare type OEmbedRich = OEmbedBase & {
+    type: "rich";
+    html: string;
+    width: number;
+    height: number;
+};
+export {};
